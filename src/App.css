@@ -40,3 +40,60 @@
 .read-the-docs {
   color: #888;
 }
+
+.main-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: var(--main-app-bg, #121212);
+  transition: background-color 0.5s ease;
+}
+
+.player-and-playlist {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.vinyl-player-container {
+  /* This class is now primarily a semantic wrapper, layout is handled by main-layout */
+}
+
+.error-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #d83c3c;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  z-index: 1000;
+}
+
+.error-banner button {
+  padding: 0.5rem 1rem;
+  border: 1px solid white;
+  background-color: transparent;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 1024px) {
+  .main-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .player-and-playlist {
+    flex-direction: column;
+    align-items: center;
+  }
+}

@@ -1,0 +1,341 @@
+/* src/components/VinylPlayer.css */
+.vinyl-player-container {
+  /* Layout properties moved to App.css */
+}
+
+.turntable-base {
+  position: relative;
+  width: 500px;
+  height: 400px;
+  /* Themed background */
+  background-color: var(--turntable-base-bg);
+  background-image: var(--turntable-base-bg-image, none);
+  background-size: var(--turntable-base-bg-size, auto);
+  border: 2px solid #111;
+  border-radius: 10px;
+  box-shadow: 
+    0 15px 35px rgba(0,0,0,0.5),
+    inset 0 2px 2px rgba(255,255,255,0.1),
+    inset 0 -2px 2px rgba(0,0,0,0.2);
+  transition: background-color 0.4s ease; /* Add transition for smooth theme change */
+}
+
+/* Position the ThemeSwitcher within the turntable base */
+.turntable-base .theme-switcher-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 50; /* Ensure it's above other elements */
+}
+
+.platter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-70%, -50%);
+  width: 300px;
+  height: 300px;
+  background: #222;
+  border-radius: 50%;
+  border: 5px solid #444;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.record {
+  width: 280px;
+  height: 280px;
+  background-color: var(--record-bg);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+  /* Concentric circles to simulate grooves */
+  background-image: repeating-radial-gradient(circle at center, var(--record-groove-color) 0, var(--record-groove-color) 1px, transparent 1px, transparent 100%);
+  background-size: 3px 3px;
+  transition: background-color 0.4s ease;
+}
+
+/* --- ANIMATION --- */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.record.playing {
+  animation: spin 3s linear infinite;
+}
+/* --- END ANIMATION --- */
+
+.record-label {
+  width: 100px;
+  height: 100px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  position: relative; /* Needed for spinner positioning */
+  transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out; /* Smooth transition */
+}
+
+/* Add a pseudo-element for the spinner */
+.record-label.loading::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin-loader 0.8s linear infinite;
+  opacity: 1;
+}
+
+/* When loading, fade out the album art slightly */
+.record-label.loading {
+  opacity: 0.7;
+}
+
+@keyframes spin-loader {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.album-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.spindle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ccc;
+  border-radius: 50%;
+  border: 2px solid #555;
+  z-index: 10;
+}
+
+.tonearm {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  width: 150px;
+  height: 20px;
+  background: #d4d4d4;
+  border-radius: 5px;
+  transform-origin: 15px 50%;
+  transform: rotate(-15deg);
+  border: 1px solid #aaa;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  z-index: 20;
+  transition: transform 0.8s ease-in-out;
+}
+
+.tonearm.playing {
+  transform: rotate(140deg) ;
+  transition: transform 0.8s ease-in-out;
+}
+
+.headshell {
+  position: absolute;
+  right: 3px;
+  top: 1px;
+  width: 19px;
+  height: 18px;
+  background: #333;
+  border-radius: 3px;
+}
+
+.power-light {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 10px;
+    height: 10px;
+    background-color: #ff4d4d; /* Bright red */
+    border-radius: 50%;
+    border: 1px solid #111;
+    transition: all 0.3s ease;
+}
+
+.power-light.on {
+    background-color: #17e510; /* Bright green */
+    box-shadow: 0 0 7px #17e510, 0 0 12px #17e510;
+}
+
+.speed-control {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: #aaa;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+/* --- NEW UNIFIED CONTROLS --- */
+.player-controls-group {
+  position: absolute;
+  /* Relocated next to the power light */
+  bottom: 15px;
+  right: 50px; 
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Removed background and padding from the group */
+}
+
+.control-button {
+  /* Base for new skeumorphic style */
+  background: var(--knob-bg);
+  border: 1px solid var(--knob-border-color);
+  width: 40px; /* Standardized size */
+  height: 40px; /* Standardized size */
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 
+    5px 5px 10px var(--knob-shadow-outer-dark),
+    -5px -5px 10px var(--knob-shadow-outer-light),
+    inset 1px 1px 2px var(--knob-shadow-inner);
+  transition: all 0.1s ease-in-out;
+}
+
+.control-button:active {
+  /* "Pressed" effect */
+  box-shadow: 
+    inset 5px 5px 10px var(--knob-shadow-inset-dark),
+    inset -5px -5px 10px var(--knob-shadow-inset-light);
+  transform: translateY(1px);
+}
+
+.control-button .svg-inline--fa {
+  font-size: 16px; /* Control icon size */
+  color: var(--text-color-secondary);
+  transition: color 0.2s ease;
+}
+
+.control-button:hover .svg-inline--fa {
+  color: var(--text-color-primary);
+}
+
+/* Remove special styling for play/pause to make all buttons uniform */
+.play-pause-button {
+  /* Inherits all styling from .control-button now */
+}
+
+.play-pause-button:hover {
+  /* No special hover needed anymore */
+}
+
+.play-pause-button .svg-inline--fa {
+  color: var(--text-color-primary); /* Keep the icon white */
+}
+
+.volume-knob-area {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  /* Make it a container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.volume-knob {
+  width: 100%;
+  height: 100%;
+  background: var(--volume-knob-bg);
+  border: 2px solid var(--volume-knob-border-color);
+  border-radius: 50%;
+  box-shadow: 0 3px 6px var(--volume-knob-shadow), inset 0 1px 1px var(--volume-knob-inner-shadow);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease-out, background 0.4s ease, border-color 0.4s ease; /* Smooth rotation and theme change */
+  pointer-events: none; /* Let clicks pass through to the slider */
+}
+
+.knob-marker {
+  width: 4px;
+  height: 12px;
+  background-color: var(--knob-marker-bg);
+  border-radius: 2px;
+  transform: translateY(-8px);
+  transition: background-color 0.4s ease;
+}
+
+.volume-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 50; /* Above the knob visual */
+}
+
+/* Hide the slider track */
+.volume-slider::-webkit-slider-runnable-track {
+  background: transparent;
+  border: none;
+}
+.volume-slider::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+
+/* Hide the slider thumb */
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 40px; /* Match knob area */
+  height: 40px; /* Match knob area */
+  background: transparent; /* Make it invisible */
+}
+.volume-slider::-moz-range-thumb {
+  width: 40px; /* Match knob area */
+  height: 40px; /* Match knob area */
+  background: transparent; /* Make it invisible */
+  border: none;
+}
+
+/* --- RGB Volume Bar Styles --- */
+.rgb-volume-bar {
+  position: absolute;
+  top: 30px;
+  left: 75px;
+  width: 120px;
+  height: 8px;
+  background-color: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  border: 1px solid #111;
+  overflow: hidden;
+}
+
+.volume-level {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(to right, #00f, #0f0, #ff0, #f00);
+  transition: width 0.2s ease-out;
+}
+/* --- END NEW UNIFIED CONTROLS --- */ 
