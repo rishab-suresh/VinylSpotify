@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import { AuthContext } from './AuthContext';
 
 // Define the shape of a track object based on Spotify's API
@@ -61,26 +61,42 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     queue: [],
   });
 
-  const controlPlayback = useCallback((endpoint: string, method: 'POST' | 'PUT' = 'POST') => {
+  const controlPlayback = useCallback((endpoint: string, method: 'POST' | 'PUT' = 'POST', body?: Record<string, any>) => {
     if (!auth?.accessToken || !playerState.deviceId) return;
 
     setPlayerState(s => ({ ...s, isLoading: true }));
 
-    fetch(`https://api.spotify.com/v1/me/player/${endpoint}?device_id=${playerState.deviceId}`, {
+    const options: RequestInit = {
       method,
       headers: {
-        'Authorization': `Bearer ${auth.accessToken}`
-      }
-    });
+        'Authorization': `Bearer ${auth.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+
+    fetch(`https://api.spotify.com/v1/me/player/${endpoint}?device_id=${playerState.deviceId}`, options)
+      .catch(error => console.error("Playback control error:", error));
   }, [auth?.accessToken, playerState.deviceId]);
 
   const togglePlay = useCallback(() => {
+    if (!playerState.track) return; // Can't play if there's no track
+
     if (!playerState.isPaused) {
       controlPlayback('pause', 'PUT');
     } else {
-      controlPlayback('play', 'PUT');
+      const body: { context_uri?: string, uris?: string[] } = {};
+      if (playerState.context?.uri) {
+        body.context_uri = playerState.context.uri;
+      } else if (playerState.track?.uri) {
+        body.uris = [playerState.track.uri];
+      }
+      controlPlayback('play', 'PUT', body);
     }
-  }, [playerState.isPaused, controlPlayback]);
+  }, [playerState.isPaused, playerState.track, playerState.context, controlPlayback]);
 
   const nextTrack = useCallback(() => {
     controlPlayback('next');
@@ -90,11 +106,11 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     controlPlayback('previous');
   }, [controlPlayback]);
 
-  const setDeviceId = (deviceId: string | null) => {
+  const setDeviceId = useCallback((deviceId: string | null) => {
     setPlayerState(s => ({ ...s, deviceId }));
-  };
+  }, []);
 
-  const updatePlayerState = (state: Spotify.PlaybackState | null) => {
+  const updatePlayerState = useCallback((state: Spotify.PlaybackState | null) => {
     if (!state) {
       // Player is not active or has disconnected
       setPlayerState(s => ({ ...s, isActive: false, isLoading: false, track: null, context: null, queue: [] }));
@@ -109,9 +125,9 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       context: state.context,
       queue: state.track_window.next_tracks,
     }));
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     ...playerState,
     player,
     setPlayer,
@@ -120,7 +136,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     togglePlay,
     nextTrack,
     previousTrack,
-  };
+  }), [playerState, player, setDeviceId, updatePlayerState, togglePlay, nextTrack, previousTrack]);
 
   return (
     <PlayerContext.Provider value={value}>

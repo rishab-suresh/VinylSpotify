@@ -53,9 +53,9 @@
   justify-content: center;
   align-items: center;
   box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-  /* Concentric circles to simulate grooves */
-  background-image: repeating-radial-gradient(circle at center, var(--record-groove-color) 0, var(--record-groove-color) 1px, transparent 1px, transparent 100%);
-  background-size: 3px 3px;
+  /* Use a performant SVG for the grooves instead of a costly gradient */
+  background-image: url('../assets/record-grooves.svg');
+  background-size: cover; /* Ensure SVG covers the area */
   transition: background-color 0.4s ease;
 }
 
@@ -176,13 +176,14 @@
     box-shadow: 0 0 7px #17e510, 0 0 12px #17e510;
 }
 
-.speed-control {
+.author{
     position: absolute;
     bottom: 20px;
     left: 20px;
     color: #aaa;
     font-family: monospace;
     font-size: 14px;
+    cursor: pointer;
 }
 
 /* --- NEW UNIFIED CONTROLS --- */

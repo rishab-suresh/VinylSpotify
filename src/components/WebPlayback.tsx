@@ -1,21 +1,22 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { usePlayer } from '../context/PlayerContext';
 
 const WebPlayback: React.FC = () => {
   const auth = useContext(AuthContext);
   const { setPlayer, setDeviceId, updatePlayerState } = usePlayer();
+  const playerRef = useRef<Spotify.Player | null>(null);
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
+    if (!auth?.accessToken) {
+      return;
+    }
 
-    document.body.appendChild(script);
-
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      if (!auth?.accessToken) return;
-
+    const setupPlayer = () => {
+      if (playerRef.current) {
+        return;
+      }
+      
       const player = new window.Spotify.Player({
         name: 'Vinyl Player Web App',
         getOAuthToken: (cb: (token: string) => void) => {
@@ -24,42 +25,63 @@ const WebPlayback: React.FC = () => {
         volume: 0.5
       });
 
-      setPlayer(player);
-
-      player.addListener('ready', ({ device_id }) => {
+      const onReady = ({ device_id }: { device_id: string }) => {
         console.log('Ready with Device ID', device_id);
         setDeviceId(device_id);
-      });
+      };
 
-      player.addListener('not_ready', ({ device_id }) => {
+      const onNotReady = ({ device_id }: { device_id: string }) => {
         console.log('Device ID has gone offline', device_id);
         setDeviceId(null);
-      });
+      };
 
-      player.addListener('player_state_changed', (state) => {
-        // state can be null here if the player becomes inactive
+      const onStateChanged = (state: Spotify.PlaybackState | null) => {
         updatePlayerState(state);
-      });
+      };
 
-      player.addListener('authentication_error', ({ message }) => {
-          console.error('Failed to authenticate', message);
-      });
+      const onAuthError = ({ message }: { message: string }) => {
+        console.error('Failed to authenticate', message);
+      };
 
-      player.addListener('account_error', ({ message }) => {
-          console.error('Account error', message);
-      });
+      const onAccountError = ({ message }: { message: string }) => {
+        console.error('Account error', message);
+      };
+      
+      player.addListener('ready', onReady);
+      player.addListener('not_ready', onNotReady);
+      player.addListener('player_state_changed', onStateChanged);
+      player.addListener('authentication_error', onAuthError);
+      player.addListener('account_error', onAccountError);
 
       player.connect().then((success: boolean) => {
-          if (success) {
-              console.log("The Spotify player has connected successfully!");
-          }
+        if (success) {
+          console.log("The Spotify player has connected successfully!");
+        }
       });
+      
+      playerRef.current = player;
+      setPlayer(player);
     };
 
-    return () => {
-      // Here you might want to disconnect the player, but it depends on the desired UX
+    if (!window.Spotify) {
+      const script = document.createElement("script");
+      script.src = "https://sdk.scdn.co/spotify-player.js";
+      script.async = true;
+
+      document.body.appendChild(script);
+      
+      window.onSpotifyWebPlaybackSDKReady = setupPlayer;
+    } else {
+      setupPlayer();
     }
-  }, [auth, setPlayer, setDeviceId, updatePlayerState]);
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.disconnect();
+        console.log('Spotify Player disconnected.');
+      }
+    };
+  }, [auth?.accessToken, setPlayer, setDeviceId, updatePlayerState]);
 
   return null;
 };

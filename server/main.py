@@ -2,7 +2,7 @@ import os
 import secrets
 import string
 from urllib.parse import urlencode
-import requests
+import httpx
 from base64 import b64encode
 
 from fastapi import FastAPI, Request
@@ -60,7 +60,7 @@ def login():
     return response
 
 @app.get("/auth/callback")
-def callback(request: Request, code: str = None, state: str = None, error: str = None):
+async def callback(request: Request, code: str = None, state: str = None, error: str = None):
     """
     Handles the callback from Spotify after the user authorizes the app.
     Exchanges the authorization code for an access token.
@@ -76,19 +76,20 @@ def callback(request: Request, code: str = None, state: str = None, error: str =
         auth_header = b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
         
         try:
-            token_response = requests.post(
-                'https://accounts.spotify.com/api/token',
-                data={
-                    'grant_type': 'authorization_code',
-                    'code': code,
-                    'redirect_uri': REDIRECT_URI,
-                },
-                headers={
-                    'Authorization': f'Basic {auth_header}',
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            )
-            token_response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+            async with httpx.AsyncClient() as client:
+                token_response = await client.post(
+                    'https://accounts.spotify.com/api/token',
+                    data={
+                        'grant_type': 'authorization_code',
+                        'code': code,
+                        'redirect_uri': REDIRECT_URI,
+                    },
+                    headers={
+                        'Authorization': f'Basic {auth_header}',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                )
+                token_response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
             token_data = token_response.json()
 
             # Pass tokens to the frontend via query parameters
@@ -102,7 +103,7 @@ def callback(request: Request, code: str = None, state: str = None, error: str =
                 response.delete_cookie(STATE_KEY) # Clean up the state cookie
                 return response
             
-        except requests.exceptions.RequestException as e:
+        except httpx.RequestError as e:
             return RedirectResponse(url=f"{FRONTEND_URI}/?error=token_exchange_failed")
 
     return RedirectResponse(url=f"{FRONTEND_URI}/?error=invalid_token")

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useMemo, type FC, type ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useMemo, useCallback, type FC, type ReactNode } from 'react';
 
 interface AuthState {
   accessToken: string | null;
@@ -28,25 +28,25 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     error: null,
   });
 
-  const authStarted = () => {
+  const authStarted = useCallback(() => {
     setAuthState(s => ({ ...s, status: 'loading' }));
-  };
+  }, []);
   
-  const login = (accessToken: string, refreshToken: string) => {
+  const login = useCallback((accessToken: string, refreshToken: string) => {
     localStorage.setItem('spotify_access_token', accessToken);
     localStorage.setItem('spotify_refresh_token', refreshToken);
     setAuthState({ accessToken, refreshToken, status: 'succeeded', error: null });
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('spotify_access_token');
     localStorage.removeItem('spotify_refresh_token');
     setAuthState({ accessToken: null, refreshToken: null, status: 'idle', error: null });
-  };
+  }, []);
   
-  const setError = (error: string) => {
+  const setError = useCallback((error: string) => {
     setAuthState(s => ({ ...s, status: 'failed', error }));
-  };
+  }, []);
 
   const value = useMemo(() => ({
     ...authState,
@@ -54,7 +54,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     logout,
     setError,
     authStarted
-  }), [authState]);
+  }), [authState, login, logout, setError, authStarted]);
 
   return (
     <AuthContext.Provider value={value}>

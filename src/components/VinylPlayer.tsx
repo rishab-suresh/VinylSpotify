@@ -115,7 +115,7 @@ const VinylPlayer: React.FC = () => {
           </button>
         </div>
         <div className={`power-light ${isPlaying ? 'on' : ''}`}></div>
-        <div className="speed-control">33</div>
+        <div className="author" onClick={() => window.open("https://portfolio-kappa-gilt-97.vercel.app/", "_blank") }>Rishab Suresh</div>
       </div>
     </div>
   );
