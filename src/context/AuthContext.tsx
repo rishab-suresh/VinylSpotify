@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useMemo, useCallback, type FC, type ReactNode } from 'react';
+import React, { createContext, useState, useCallback, ReactNode } from 'react';
 
 interface AuthState {
   accessToken: string | null;
@@ -20,7 +20,7 @@ interface AuthProviderProps {
     children: ReactNode;
 }
 
-export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     accessToken: localStorage.getItem('spotify_access_token'),
     refreshToken: localStorage.getItem('spotify_refresh_token'),
@@ -48,7 +48,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     setAuthState(s => ({ ...s, status: 'failed', error }));
   }, []);
 
-  const value = useMemo(() => ({
+  const value = React.useMemo(() => ({
     ...authState,
     login,
     logout,

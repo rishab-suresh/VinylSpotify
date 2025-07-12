@@ -95,7 +95,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       // Providing a context or URIs would restart playback from the beginning.
       controlPlayback('play', 'PUT');
     }
-  }, [playerState.isPaused, playerState.track, playerState.context, controlPlayback]);
+  }, [playerState.isPaused, playerState.track, controlPlayback]);
 
   const nextTrack = useCallback(() => {
     controlPlayback('next');

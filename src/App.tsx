@@ -14,25 +14,24 @@ const App: React.FC = () => {
   useTheme();
 
   useEffect(() => {
-    // This effect runs once on mount to handle the auth callback
-    if (!auth) return;
-
-    // Check if the URL contains tokens from the auth redirect
-    const params = new URLSearchParams(window.location.search);
-    const accessToken = params.get('access_token');
-    const refreshToken = params.get('refresh_token');
-    const error = params.get('error');
-
-    if (error) {
-      auth.setError(error);
-      // Clean the URL
-      window.history.replaceState({}, document.title, "/");
-    } else if (accessToken && refreshToken) {
-      auth.login(accessToken, refreshToken);
-      // Clean the URL
-      window.history.replaceState({}, document.title, "/");
+    // If we have an access token, we don't need to do anything.
+    if (auth?.accessToken) {
+      return;
     }
-  }, []);
+
+    // This effect runs on mount to check for an access token in the URL.
+    const hash = window.location.hash;
+    window.location.hash = ""; // Clear the hash from the URL
+    if (hash) {
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      
+      if (accessToken) {
+        auth?.login(accessToken, refreshToken || '');
+      }
+    }
+  }, [auth]);
 
   if (!auth) {
     return <div>Loading...</div>;

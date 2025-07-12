@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faBackward, faForward } from '@fortawesome/free-solid-svg-icons';
 import './VinylPlayer.css';
