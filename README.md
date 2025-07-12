@@ -34,11 +34,17 @@ To connect to Spotify, you need to create an application in the [Spotify Develop
 2.  Give your app a name and description.
 3.  Once created, go to the app's **Settings**.
 4.  Copy your **Client ID**. You do not need the Client Secret.
-5.  In the settings, you must also add a **Redirect URI**. For the local version to work, add the following URI:
-    ```
-    http://localhost:3000/
-    ```
-    If you deploy this application (e.g., on Vercel), you will need to add that deployment URL to the list of Redirect URIs as well.
+5.  In the settings, you must also add your **Redirect URIs**. You will need to add a URI for your local development environment and another for your deployed application.
+
+    -   **For local development**, add this exact URI:
+        ```
+        http://127.0.0.1:3000/
+        ```
+    -   **For your deployed site** (e.g., on Vercel), you must add its public URL. For example:
+        ```
+        https://vinyl-spotify.vercel.app/
+        ```
+    You can add multiple Redirect URIs. It is important that both your local and deployed URLs are listed in your Spotify app settings.
 
 ### 2. Install Dependencies
 
@@ -52,7 +58,7 @@ npm install
 npm start
 ```
 
-The frontend will run on `http://localhost:3000` and should open automatically in your browser.
+The frontend will run on `http://127.0.0.1:3000` and should open automatically in your browser.
 
 The first time you open the app, it will ask you for the **Client ID** you copied from the Spotify Developer Dashboard. Paste it into the form to connect the app to your Spotify account.
 
