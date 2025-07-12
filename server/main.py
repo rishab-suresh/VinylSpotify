@@ -19,7 +19,7 @@ CLIENT_SECRET = os.getenv("VITE_SPOTIFY_CLIENT_SECRET")
 # The redirect URI for the FastAPI server itself
 REDIRECT_URI = "http://127.0.0.1:8000/auth/callback"
 # The URI of the React frontend to redirect back to
-FRONTEND_URI = "http://127.0.0.1:3001"
+FRONTEND_URI = "http://127.0.0.1:3000"
 # The key for storing the state in a cookie
 STATE_KEY = "spotify_auth_state"
 
