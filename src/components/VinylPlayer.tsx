@@ -7,18 +7,18 @@ import { usePlayer } from '../context/PlayerContext';
 import ThemeSwitcher from './ThemeSwitcher';
 
 const VinylPlayer: React.FC = () => {
-  const { theme } = useTheme();
-  const { 
+    const { 
     track, 
     isPaused, 
     deviceId,
     isLoading,
+    volume,
+    setVolume,
     togglePlay,
     nextTrack,
     previousTrack
   } = usePlayer();
   const player = usePlayer().player;
-  const [localVolume, setLocalVolume] = useState(1);
 
   const albumArtUrl = track?.album.images[0]?.url;
   const recordStyle = {
@@ -34,24 +34,22 @@ const VinylPlayer: React.FC = () => {
   useEffect(() => {
     const getVolume = async () => {
       if (player) {
-        const volume = await player.getVolume();
-        setLocalVolume(volume);
+        const currentVolume = await player.getVolume();
+        setVolume(currentVolume);
       }
     };
     getVolume();
 
     // The player object might be recreated, so we depend on it
-  }, [player]);
+  }, [player, setVolume]);
 
   const handlePowerClick = () => {
     togglePlay();
   };
   
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const volume = parseFloat(e.target.value);
-    if (player) {
-      player.setVolume(volume);
-    }
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
   };
 
   return (
@@ -73,7 +71,7 @@ const VinylPlayer: React.FC = () => {
         </div>
 
         <div className="volume-knob-area">
-          <div className="volume-knob" style={{ transform: `rotate(${localVolume * 270 - 135}deg)` }}>
+          <div className="volume-knob" style={{ transform: `rotate(${volume * 270 - 135}deg)` }}>
             <div className="knob-marker"></div>
           </div>
           <input
@@ -81,7 +79,7 @@ const VinylPlayer: React.FC = () => {
             min="0"
             max="1"
             step="0.01"
-            defaultValue="0.5"
+            value={volume}
             className="volume-slider"
             onChange={handleVolumeChange}
             disabled={!deviceId}

@@ -25,6 +25,7 @@ interface PlayerState {
     metadata: any;
   } | null;
   queue: Track[];
+  volume: number;
   // We can add more state here later, like position, duration, etc.
 }
 
@@ -34,6 +35,7 @@ interface PlayerContextType extends PlayerState {
   setPlayer: (player: Spotify.Player | null) => void;
   setDeviceId: (deviceId: string | null) => void;
   updatePlayerState: (state: Spotify.PlaybackState | null) => void;
+  setVolume: (volume: number) => void;
   togglePlay: () => void;
   nextTrack: () => void;
   previousTrack: () => void;
@@ -59,6 +61,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     deviceId: null,
     context: null,
     queue: [],
+    volume: 1,
   });
 
   const controlPlayback = useCallback((endpoint: string, method: 'POST' | 'PUT' = 'POST', body?: Record<string, any>) => {
@@ -88,13 +91,9 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     if (!playerState.isPaused) {
       controlPlayback('pause', 'PUT');
     } else {
-      const body: { context_uri?: string, uris?: string[] } = {};
-      if (playerState.context?.uri) {
-        body.context_uri = playerState.context.uri;
-      } else if (playerState.track?.uri) {
-        body.uris = [playerState.track.uri];
-      }
-      controlPlayback('play', 'PUT', body);
+      // To resume playback, we call the play endpoint without a body.
+      // Providing a context or URIs would restart playback from the beginning.
+      controlPlayback('play', 'PUT');
     }
   }, [playerState.isPaused, playerState.track, playerState.context, controlPlayback]);
 
@@ -106,6 +105,14 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     controlPlayback('previous');
   }, [controlPlayback]);
 
+  const setVolume = useCallback((volume: number) => {
+    if (player) {
+      player.setVolume(volume).then(() => {
+        setPlayerState(s => ({ ...s, volume }));
+      });
+    }
+  }, [player]);
+
   const setDeviceId = useCallback((deviceId: string | null) => {
     setPlayerState(s => ({ ...s, deviceId }));
   }, []);
@@ -113,9 +120,17 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const updatePlayerState = useCallback((state: Spotify.PlaybackState | null) => {
     if (!state) {
       // Player is not active or has disconnected
-      setPlayerState(s => ({ ...s, isActive: false, isLoading: false, track: null, context: null, queue: [] }));
+      setPlayerState(s => ({ ...s, isActive: false, isLoading: false, track: null, context: null, queue: [], volume: s.volume }));
       return;
     }
+
+    // When state changes (including external volume changes), get the latest volume
+    player?.getVolume().then(volume => {
+      if (volume !== null) {
+        setPlayerState(s => ({ ...s, volume }));
+      }
+    });
+
     setPlayerState(s => ({
       ...s,
       track: state.track_window.current_track,
@@ -125,7 +140,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       context: state.context,
       queue: state.track_window.next_tracks,
     }));
-  }, []);
+  }, [player]);
 
   const value = useMemo(() => ({
     ...playerState,
@@ -133,10 +148,11 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     setPlayer,
     setDeviceId,
     updatePlayerState,
+    setVolume,
     togglePlay,
     nextTrack,
     previousTrack,
-  }), [playerState, player, setDeviceId, updatePlayerState, togglePlay, nextTrack, previousTrack]);
+  }), [playerState, player, setDeviceId, updatePlayerState, setVolume, togglePlay, nextTrack, previousTrack]);
 
   return (
     <PlayerContext.Provider value={value}>
