@@ -49,7 +49,9 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const REDIRECT_URI = 'http://127.0.0.1:3000/';
+// The redirect URI must match the one in your Spotify Developer Dashboard.
+// Using window.location.origin makes this dynamic for both local and deployed environments.
+const REDIRECT_URI = `${window.location.origin}/`;
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
