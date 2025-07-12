@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useRef } from 'react';
+import React, { useEffect, useContext, useRef, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { usePlayer } from '../context/PlayerContext';
 
@@ -6,6 +6,26 @@ const WebPlayback: React.FC = () => {
   const auth = useContext(AuthContext);
   const { setPlayer, setDeviceId, updatePlayerState } = usePlayer();
   const playerRef = useRef<Spotify.Player | null>(null);
+
+  const onReady = useCallback(async ({ device_id }: { device_id: string }) => {
+    console.log('Ready with Device ID', device_id);
+    setDeviceId(device_id);
+
+    // --- Automatically transfer playback to this new device ---
+    if (auth?.accessToken) {
+      await fetch('https://api.spotify.com/v1/me/player', {
+        method: 'PUT',
+        body: JSON.stringify({
+          device_ids: [device_id],
+          play: false, // Don't start playing automatically
+        }),
+        headers: {
+          'Authorization': `Bearer ${auth.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+  }, [auth?.accessToken, setDeviceId]);
 
   useEffect(() => {
     if (!auth?.accessToken) {
@@ -24,11 +44,6 @@ const WebPlayback: React.FC = () => {
         },
         volume: 0.5
       });
-
-      const onReady = ({ device_id }: { device_id: string }) => {
-        console.log('Ready with Device ID', device_id);
-        setDeviceId(device_id);
-      };
 
       const onNotReady = ({ device_id }: { device_id: string }) => {
         console.log('Device ID has gone offline', device_id);
@@ -81,7 +96,7 @@ const WebPlayback: React.FC = () => {
         console.log('Spotify Player disconnected.');
       }
     };
-  }, [auth?.accessToken, setPlayer, setDeviceId, updatePlayerState]);
+  }, [auth?.accessToken, setPlayer, setDeviceId, updatePlayerState, onReady]);
 
   return null;
 };

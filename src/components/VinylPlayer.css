@@ -20,12 +20,36 @@
   transition: background-color 0.4s ease; /* Add transition for smooth theme change */
 }
 
-/* Position the ThemeSwitcher within the turntable base */
-.turntable-base .theme-switcher-container {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  z-index: 50; /* Ensure it's above other elements */
+.app-actions-container {
+  /* No longer positioned absolutely */
+  display: flex;
+  justify-content: center; /* Center the buttons */
+  gap: 15px;
+  margin-top: 20px; /* Add space above the buttons */
+  width: 100%;
+}
+
+.app-action-button {
+  background: var(--knob-bg);
+  border: 1px solid var(--knob-border-color);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  box-shadow: 
+    3px 3px 6px var(--knob-shadow-outer-dark),
+    -3px -3px 6px var(--knob-shadow-outer-light);
+  transition: all 0.2s ease;
+}
+
+.app-action-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-color-primary);
 }
 
 .platter {
