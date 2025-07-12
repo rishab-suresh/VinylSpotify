@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useMemo, useEffect } from 'react';
+import React, { createContext, useState, useContext, useMemo, useEffect, ReactNode } from 'react';
 import { themes, type Theme } from '../styles/themes';
 
 type ThemeContextType = {
@@ -6,9 +6,9 @@ type ThemeContextType = {
   setTheme: (name: 'dark' | 'wood' | 'floral') => void;
 };
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [themeName, setThemeName] = useState<'dark' | 'wood' | 'floral'>('dark');
 
   const theme = useMemo(() => {

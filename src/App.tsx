@@ -1,61 +1,49 @@
-import React, { useContext, useEffect } from 'react';
-import { AuthContext } from './context/AuthContext';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTheme } from './context/ThemeContext';
-
+import { AuthContext } from './context/AuthContext';
 import VinylPlayer from './components/VinylPlayer';
 import Playlist from './components/Playlist';
 import LoginModal from './components/LoginModal';
+import ClientIdForm from './components/ClientIdForm';
 import WebPlayback from './components/WebPlayback';
-
 import './App.css';
 
 const App: React.FC = () => {
+  const { theme } = useTheme();
   const auth = useContext(AuthContext);
-  useTheme();
+  const [clientId, setClientId] = useState<string | null>(() => localStorage.getItem('spotify_client_id'));
 
+  const handleSaveClientId = (id: string) => {
+    localStorage.setItem('spotify_client_id', id);
+    setClientId(id);
+    // We might need to re-initialize the auth context or reload
+    window.location.reload();
+  };
+
+  // This effect is now handled by the AuthProvider, we just need to ensure it runs
   useEffect(() => {
-    // If we have an access token, we don't need to do anything.
-    if (auth?.accessToken) {
-      return;
-    }
+    // The AuthProvider will handle the redirect and token exchange.
+    // This effect is here to ensure App component re-renders if auth state changes.
+  }, [auth?.accessToken]);
 
-    // This effect runs on mount to check for an access token in the URL.
-    const hash = window.location.hash;
-    window.location.hash = ""; // Clear the hash from the URL
-    if (hash) {
-      const params = new URLSearchParams(hash.substring(1));
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
-      
-      if (accessToken) {
-        auth?.login(accessToken, refreshToken || '');
-      }
-    }
-  }, [auth]);
 
-  if (!auth) {
-    return <div>Loading...</div>;
-  }
-
-  const { accessToken, status, error } = auth;
-  
-  if (!accessToken) {
-    return <LoginModal />;
+  if (!clientId) {
+    return <ClientIdForm onSave={handleSaveClientId} />;
   }
 
   return (
-    <div className="main-layout">
-      {status === 'failed' && (
-        <div className="error-banner">
-          <p>Login Failed: {error}</p>
-        </div>
+    <div className={`App ${theme}`}>
+      {!auth?.accessToken ? (
+        <LoginModal />
+      ) : (
+        <>
+          <WebPlayback />
+          <main className="player-layout">
+            <VinylPlayer />
+            <Playlist />
+          </main>
+        </>
       )}
-      
-      <WebPlayback />
-      <div className="player-and-playlist">
-        <VinylPlayer />
-        <Playlist />
-      </div>
     </div>
   );
 };

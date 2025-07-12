@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.6cde612c.css",
+    "main.js": "/static/js/main.df3cd6a7.js",
+    "static/media/record-grooves.svg": "/static/media/record-grooves.74d737ca58d52540cc1e.svg",
+    "index.html": "/index.html",
+    "main.6cde612c.css.map": "/static/css/main.6cde612c.css.map",
+    "main.df3cd6a7.js.map": "/static/js/main.df3cd6a7.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6cde612c.css",
+    "static/js/main.df3cd6a7.js"
+  ]
+}

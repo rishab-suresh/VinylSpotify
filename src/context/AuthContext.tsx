@@ -1,60 +1,177 @@
-import React, { createContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useState, useCallback, ReactNode, useMemo } from 'react';
+
+// --- Helper Functions for PKCE ---
+
+// Generates a secure random string for the code verifier
+const generateRandomString = (length: number): string => {
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let text = '';
+  for (let i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
+
+// Hashes the code verifier to create the code challenge
+const sha256 = async (plain: string): Promise<ArrayBuffer> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plain);
+  return window.crypto.subtle.digest('SHA-256', data);
+};
+
+// Base64-encodes the hash to get a URL-safe string
+const base64encode = (input: ArrayBuffer): string => {
+  return btoa(String.fromCharCode(...new Uint8Array(input)))
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+};
+
+
+// --- Auth Context ---
 
 interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  status: 'idle' | 'loading' | 'success' | 'failed';
   error: string | null;
 }
 
 interface AuthContextType extends AuthState {
-  login: (accessToken: string, refreshToken: string) => void;
+  login: () => void;
   logout: () => void;
-  setError: (error: string) => void;
-  authStarted: () => void;
+  getAccessToken: () => Promise<string | null>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
-    children: ReactNode;
+  children: ReactNode;
 }
+
+const REDIRECT_URI = 'http://127.0.0.1:3000/';
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     accessToken: localStorage.getItem('spotify_access_token'),
     refreshToken: localStorage.getItem('spotify_refresh_token'),
-    status: localStorage.getItem('spotify_access_token') ? 'succeeded' : 'idle',
+    status: 'idle',
     error: null,
   });
 
-  const authStarted = useCallback(() => {
-    setAuthState(s => ({ ...s, status: 'loading' }));
-  }, []);
-  
-  const login = useCallback((accessToken: string, refreshToken: string) => {
-    localStorage.setItem('spotify_access_token', accessToken);
-    localStorage.setItem('spotify_refresh_token', refreshToken);
-    setAuthState({ accessToken, refreshToken, status: 'succeeded', error: null });
+  const login = useCallback(async () => {
+    const clientId = localStorage.getItem('spotify_client_id');
+    if (!clientId) {
+      console.error("Spotify Client ID is not set.");
+      setAuthState(s => ({ ...s, status: 'failed', error: 'Spotify Client ID is not set.'}));
+      return;
+    }
+
+    const codeVerifier = generateRandomString(64);
+    localStorage.setItem('pkce_code_verifier', codeVerifier);
+    
+    const hashed = await sha256(codeVerifier);
+    const codeChallenge = base64encode(hashed);
+
+    const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative streaming user-read-playback-state user-modify-playback-state user-library-read';
+    const authUrl = new URL("https://accounts.spotify.com/authorize");
+    
+    const params = {
+      response_type: 'code',
+      client_id: clientId,
+      scope,
+      code_challenge_method: 'S256',
+      code_challenge: codeChallenge,
+      redirect_uri: REDIRECT_URI,
+    };
+    
+    authUrl.search = new URLSearchParams(params).toString();
+    window.location.href = authUrl.toString();
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('spotify_access_token');
     localStorage.removeItem('spotify_refresh_token');
+    localStorage.removeItem('pkce_code_verifier');
     setAuthState({ accessToken: null, refreshToken: null, status: 'idle', error: null });
   }, []);
-  
-  const setError = useCallback((error: string) => {
-    setAuthState(s => ({ ...s, status: 'failed', error }));
-  }, []);
 
-  const value = React.useMemo(() => ({
+  const getAccessToken = useCallback(async (code?: string): Promise<string | null> => {
+    if (authState.accessToken) {
+        // Here we should also handle token expiration and refreshing
+        return authState.accessToken;
+    }
+
+    if (!code) {
+      console.log("No code provided for token exchange.");
+      return null;
+    }
+
+    const codeVerifier = localStorage.getItem('pkce_code_verifier');
+    const clientId = localStorage.getItem('spotify_client_id');
+    if (!clientId || !codeVerifier) {
+      console.error("Client ID or code verifier is missing.");
+      return null;
+    }
+    
+    try {
+      setAuthState(s => ({...s, status: 'loading'}));
+      const response = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: clientId,
+          grant_type: "authorization_code",
+          code,
+          redirect_uri: REDIRECT_URI,
+          code_verifier: codeVerifier,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      localStorage.setItem('spotify_access_token', data.access_token);
+      localStorage.setItem('spotify_refresh_token', data.refresh_token);
+      localStorage.removeItem('pkce_code_verifier'); // Clean up
+
+      setAuthState({
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        status: 'success',
+        error: null,
+      });
+      
+      return data.access_token;
+    } catch (error) {
+      console.error("Error fetching access token:", error);
+      setAuthState(s => ({...s, status: 'failed', error: 'Failed to fetch token.'}));
+      return null;
+    }
+  }, [authState.accessToken]);
+
+  // This effect runs on mount to handle the redirect from Spotify
+  useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
+    if (code) {
+      getAccessToken(code);
+      // Clean the URL
+      window.history.replaceState({}, document.title, "/");
+    }
+  });
+
+  const value = useMemo(() => ({
     ...authState,
     login,
     logout,
-    setError,
-    authStarted
-  }), [authState, login, logout, setError, authStarted]);
+    getAccessToken,
+  }), [authState, login, logout, getAccessToken]);
 
   return (
     <AuthContext.Provider value={value}>
