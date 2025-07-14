@@ -13,19 +13,41 @@ const WebPlayback: React.FC = () => {
 
     // --- Automatically transfer playback to this new device ---
     if (auth?.accessToken) {
-      await fetch('https://api.spotify.com/v1/me/player', {
-        method: 'PUT',
-        body: JSON.stringify({
-          device_ids: [device_id],
-          play: false, // Don't start playing automatically
-        }),
-        headers: {
-          'Authorization': `Bearer ${auth.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      try {
+        await fetch('https://api.spotify.com/v1/me/player', {
+          method: 'PUT',
+          body: JSON.stringify({
+            device_ids: [device_id],
+            play: false, // Don't start playing automatically
+          }),
+          headers: {
+            'Authorization': `Bearer ${auth.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        console.error("Failed to transfer playback", error);
+      }
     }
   }, [auth?.accessToken, setDeviceId]);
+
+  const onNotReady = useCallback(({ device_id }: { device_id: string }) => {
+      console.log('Device ID has gone offline', device_id);
+      setDeviceId(null);
+  }, [setDeviceId]);
+
+  const onStateChanged = useCallback((state: Spotify.PlaybackState | null) => {
+      updatePlayerState(state);
+  }, [updatePlayerState]);
+
+  const onAuthError = useCallback(({ message }: { message: string }) => {
+      console.error('Failed to authenticate', message);
+  }, []);
+  
+  const onAccountError = useCallback(({ message }: { message: string }) => {
+      console.error('Account error', message);
+  }, []);
+
 
   useEffect(() => {
     if (!auth?.accessToken) {
@@ -44,23 +66,6 @@ const WebPlayback: React.FC = () => {
         },
         volume: 0.5
       });
-
-      const onNotReady = ({ device_id }: { device_id: string }) => {
-        console.log('Device ID has gone offline', device_id);
-        setDeviceId(null);
-      };
-
-      const onStateChanged = (state: Spotify.PlaybackState | null) => {
-        updatePlayerState(state);
-      };
-
-      const onAuthError = ({ message }: { message: string }) => {
-        console.error('Failed to authenticate', message);
-      };
-
-      const onAccountError = ({ message }: { message: string }) => {
-        console.error('Account error', message);
-      };
       
       player.addListener('ready', onReady);
       player.addListener('not_ready', onNotReady);
@@ -93,10 +98,12 @@ const WebPlayback: React.FC = () => {
     return () => {
       if (playerRef.current) {
         playerRef.current.disconnect();
-        console.log('Spotify Player disconnected.');
+        playerRef.current = null; // Nullify the ref to allow re-initialization
+        setPlayer(null); // Also clear the player from the context
+        console.log('Spotify Player disconnected and cleaned up.');
       }
     };
-  }, [auth?.accessToken, setPlayer, setDeviceId, updatePlayerState, onReady]);
+  }, [auth?.accessToken, setPlayer, onReady, onNotReady, onStateChanged, onAuthError, onAccountError]);
 
   return null;
 };

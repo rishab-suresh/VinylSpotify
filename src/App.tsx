@@ -31,6 +31,16 @@ const App: React.FC = () => {
     return <ClientIdForm onSave={handleSaveClientId} />;
   }
 
+  if (auth?.status === 'loading') {
+    return (
+      <div className={`App ${theme}`}>
+        <div className="loading-container">
+          <p>Logging in...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`App ${theme}`}>
       {!auth?.accessToken ? (

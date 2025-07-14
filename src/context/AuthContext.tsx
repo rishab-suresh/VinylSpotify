@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, ReactNode, useMemo } from 'react';
+import React, { createContext, useState, useCallback, ReactNode, useMemo, useEffect } from 'react';
 
 // --- Helper Functions for PKCE ---
 
@@ -92,18 +92,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const logout = useCallback(() => {
+    setAuthState({ accessToken: null, refreshToken: null, status: 'idle', error: null });
     localStorage.removeItem('spotify_access_token');
     localStorage.removeItem('spotify_refresh_token');
-    localStorage.removeItem('pkce_code_verifier');
-    setAuthState({ accessToken: null, refreshToken: null, status: 'idle', error: null });
+    localStorage.removeItem('spotify_pkce_code_verifier');
+    window.location.href = '/';
   }, []);
 
   const getAccessToken = useCallback(async (code?: string): Promise<string | null> => {
-    if (authState.accessToken) {
-        // Here we should also handle token expiration and refreshing
-        return authState.accessToken;
+    // If we're already fetching a token, don't do it again.
+    if (authState.status === 'loading') {
+      return null;
     }
-
+    
     if (!code) {
       console.log("No code provided for token exchange.");
       return null;
@@ -154,19 +155,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAuthState(s => ({...s, status: 'failed', error: 'Failed to fetch token.'}));
       return null;
     }
-  }, [authState.accessToken]);
+  }, [authState.status]);
 
   // This effect runs on mount to handle the redirect from Spotify
-  useState(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
 
-    if (code) {
+    // If we have a code and we don't have a token yet, fetch it.
+    if (code && !authState.accessToken) {
       getAccessToken(code);
       // Clean the URL
       window.history.replaceState({}, document.title, "/");
     }
-  });
+  }, [authState.accessToken, getAccessToken]);
 
   const value = useMemo(() => ({
     ...authState,

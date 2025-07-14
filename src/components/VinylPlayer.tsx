@@ -19,7 +19,6 @@ const VinylPlayer: React.FC = () => {
     nextTrack,
     previousTrack
   } = usePlayer();
-  const player = usePlayer().player;
 
   const handleLogout = () => {
     auth?.logout();
@@ -42,19 +41,6 @@ const VinylPlayer: React.FC = () => {
   };
 
   const isPlaying = !isPaused && !!deviceId;
-
-  // Effect to sync local volume with player volume
-  useEffect(() => {
-    const getVolume = async () => {
-      if (player) {
-        const currentVolume = await player.getVolume();
-        setVolume(currentVolume);
-      }
-    };
-    getVolume();
-
-    // The player object might be recreated, so we depend on it
-  }, [player, setVolume]);
 
   const handlePowerClick = () => {
     togglePlay();

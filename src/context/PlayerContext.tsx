@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
 import { AuthContext } from './AuthContext';
 
 // Define the shape of a track object based on Spotify's API
@@ -31,7 +31,6 @@ interface PlayerState {
 
 // Define the shape of the context, including state and control functions
 interface PlayerContextType extends PlayerState {
-  player: Spotify.Player | null;
   setPlayer: (player: Spotify.Player | null) => void;
   setDeviceId: (deviceId: string | null) => void;
   updatePlayerState: (state: Spotify.PlaybackState | null) => void;
@@ -52,7 +51,7 @@ interface PlayerProviderProps {
 // Create the provider component
 export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const auth = useContext(AuthContext);
-  const [player, setPlayer] = useState<Spotify.Player | null>(null);
+  const playerRef = useRef<Spotify.Player | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState>({
     track: null,
     isPaused: true,
@@ -63,6 +62,10 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     queue: [],
     volume: 1,
   });
+
+  const setPlayer = useCallback((player: Spotify.Player | null) => {
+    playerRef.current = player;
+  }, []);
 
   const controlPlayback = useCallback((endpoint: string, method: 'POST' | 'PUT' = 'POST', body?: Record<string, any>) => {
     if (!auth?.accessToken || !playerState.deviceId) return;
@@ -106,12 +109,12 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   }, [controlPlayback]);
 
   const setVolume = useCallback((volume: number) => {
-    if (player) {
-      player.setVolume(volume).then(() => {
+    if (playerRef.current) {
+      playerRef.current.setVolume(volume).then(() => {
         setPlayerState(s => ({ ...s, volume }));
       });
     }
-  }, [player]);
+  }, []);
 
   const setDeviceId = useCallback((deviceId: string | null) => {
     setPlayerState(s => ({ ...s, deviceId }));
@@ -125,7 +128,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     }
 
     // When state changes (including external volume changes), get the latest volume
-    player?.getVolume().then(volume => {
+    playerRef.current?.getVolume().then(volume => {
       if (volume !== null) {
         setPlayerState(s => ({ ...s, volume }));
       }
@@ -140,11 +143,10 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       context: state.context,
       queue: state.track_window.next_tracks,
     }));
-  }, [player]);
+  }, []);
 
   const value = useMemo(() => ({
     ...playerState,
-    player,
     setPlayer,
     setDeviceId,
     updatePlayerState,
@@ -152,7 +154,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     togglePlay,
     nextTrack,
     previousTrack,
-  }), [playerState, player, setDeviceId, updatePlayerState, setVolume, togglePlay, nextTrack, previousTrack]);
+  }), [playerState, setPlayer, setDeviceId, updatePlayerState, setVolume, togglePlay, nextTrack, previousTrack]);
 
   return (
     <PlayerContext.Provider value={value}>
