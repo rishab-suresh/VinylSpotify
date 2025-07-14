@@ -35,7 +35,7 @@ const App: React.FC = () => {
     return (
       <div className={`App ${theme}`}>
         <div className="loading-container">
-          <p>Logging in...</p>
+          <div className="loader"></div>
         </div>
       </div>
     );

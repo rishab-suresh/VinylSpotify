@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, {useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faBackward, faForward, faSignOutAlt, faEdit } from '@fortawesome/free-solid-svg-icons';

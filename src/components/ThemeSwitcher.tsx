@@ -9,8 +9,7 @@ const ThemeSwitcher: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
 
-  const availableThemes = ['dark', 'wood', 'floral']; // Add more themes here if needed
-
+  const availableThemes = ['dark', 'wood', 'floral']; 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (switcherRef.current && !switcherRef.current.contains(event.target as Node)) {

@@ -49,7 +49,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// The redirect URI must match the one in your Spotify Developer Dashboard.
+
 // Using window.location.origin makes this dynamic for both local and deployed environments.
 const REDIRECT_URI = `${window.location.origin}/`;
 
