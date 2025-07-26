@@ -51,8 +51,9 @@ interface AuthProviderProps {
 
 // --- App Configuration ---
 // The Client ID is read from an environment variable.
-// You must create a .env file in the root of the project with:
+// For local development, you must create a .env file in the root of the project with:
 // REACT_APP_SPOTIFY_CLIENT_ID=your_spotify_client_id
+// For deployment, set this variable in your Vercel project settings.
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 
 // The redirect URI must match the one in your Spotify Developer Dashboard.
@@ -61,7 +62,7 @@ const REDIRECT_URI = `${window.location.origin}/`;
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
-    // Tokens are now read from sessionStorage
+    // Tokens are now read from sessionStorage for better privacy
     accessToken: sessionStorage.getItem('spotify_access_token'),
     refreshToken: sessionStorage.getItem('spotify_refresh_token'),
     status: 'idle',
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = useCallback(async () => {
     if (!CLIENT_ID) {
-      console.error("Spotify Client ID is not set. Please create a .env file.");
+      console.error("Spotify Client ID is not set. Please create a .env file or set it in your Vercel dashboard.");
       setAuthState(s => ({ ...s, status: 'failed', error: 'Spotify Client ID is not configured.'}));
       return;
     }

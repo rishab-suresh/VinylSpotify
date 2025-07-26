@@ -152,8 +152,8 @@ export const aquaTheme: Theme = {
     '--knob-bg': 'linear-gradient(145deg, #8ab5c1, #5e8c9a)',
     '--knob-border-color': '#4a6d7a',
     '--knob-shadow-outer-dark': '#42616d', // Darker, less intense shadow
-    '--knob-shadow-outer-light': '#94c2d2', // Lighter, less intense glow
-    '--knob-shadow-inner': 'rgba(255, 255, 255, 0.15)',
+    '--knob-shadow-outer-light': 'transparent', // Removing outer glow for performance
+    '--knob-shadow-inner': 'rgba(255, 255, 255, 0.1)', // Simplified inner shadow
     '--knob-shadow-inset-dark': '#4a6d7a',
     '--knob-shadow-inset-light': '#a2d3e4',
     '--volume-knob-bg': 'linear-gradient(to bottom, #8ab5c1, #5e8c9a)',

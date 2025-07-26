@@ -113,4 +113,4 @@ const VinylPlayer: React.FC = () => {
   );
 };
 
-export default VinylPlayer; 
+export default React.memo(VinylPlayer); 

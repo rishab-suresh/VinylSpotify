@@ -12,10 +12,10 @@
   border: 2px solid #111;
   border-radius: 10px;
   box-shadow: 
-    0 15px 35px rgba(0,0,0,0.5),
-    inset 0 2px 2px rgba(255,255,255,0.1),
-    inset 0 -2px 2px rgba(0,0,0,0.2);
-  transition: background-color 0.4s ease; /* Add transition for smooth theme change */
+    0 10px 20px rgba(0,0,0,0.4), /* Reduced shadow for performance */
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    inset 0 -1px 1px rgba(0,0,0,0.2);
+  transition: background-color 0.4s ease, box-shadow 0.4s ease; /* Add transition for smooth theme change */
 }
 
 .app-actions-container {
@@ -194,7 +194,7 @@
 
 .power-light.on {
     background-color: #17e510; /* Bright green */
-    box-shadow: 0 0 7px #17e510, 0 0 12px #17e510;
+    box-shadow: 0 0 5px #17e510; /* Simplified shadow */
 }
 
 .author {
@@ -237,8 +237,8 @@
   justify-content: center;
   align-items: center;
   box-shadow: 
-    2px 2px 2px var(--knob-shadow-outer-dark),
-    -1px -1px 4px var(--knob-shadow-outer-light),
+    1px 1px 2px var(--knob-shadow-outer-dark), /* Simplified shadow */
+    -1px -1px 2px var(--knob-shadow-outer-light),
     inset 1px 0px 1px var(--knob-shadow-inner);
   transition: all 0.1s ease-in-out;
 }

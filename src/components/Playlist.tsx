@@ -37,4 +37,4 @@ const Playlist: React.FC = () => {
   );
 };
 
-export default Playlist; 
+export default React.memo(Playlist); 
