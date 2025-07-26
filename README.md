@@ -9,22 +9,16 @@ The entire application runs directly in your browser. There is no backend server
 -   **Real-time Playback:** Streams your Spotify music directly.
 -   **Vinyl Visualization:** Shows your current track's album art on a spinning record.
 -   **Queue Display:** Lists your upcoming tracks.
--   **Theming:** Switch between different visual themes for the player.
+-   **Multiple Themes:** Switch between different visual themes for the player (Dark, Wood, Floral, Aqua).
 -   **No Backend Required:** Runs entirely in the browser using the secure PKCE authentication flow.
+-   **Session-based login:** The session ends when you close your browser tab, ensuring privacy.
 
 ## How It Works
 
-This application uses two key pieces of Spotify's technology to function:
-
--   **Web Playback SDK:** This is the specialized library that turns this web application into a virtual "speaker". It handles the streaming of audio directly to your browser and makes the "Vinyl Player" appear in your list of available Spotify Connect devices.
-
--   **Web API with PKCE:** This application uses the Authorization Code Flow with PKCE to securely authenticate you without needing a backend server or exposing any secret keys.
-
-In short, the **Playback SDK** is the *player*, and the **Web API** is the *remote control*.
+-   **Web Playback SDK:** This application uses Spotify's SDK to turn the browser into a virtual "speaker," allowing it to stream audio directly and appear in your Spotify Connect device list.
+-   **Web API with PKCE:** The app uses the Authorization Code Flow with PKCE to securely authenticate you without needing a backend server or exposing any secret keys.
 
 ## Setup and Installation
-
-Follow these steps to get the application running locally.
 
 ### 1. Spotify API Credentials
 
@@ -33,26 +27,29 @@ To connect to Spotify, you need to create an application in the [Spotify Develop
 1.  Click **"Create App"**.
 2.  Give your app a name and description.
 3.  Once created, go to the app's **Settings**.
-4.  Copy your **Client ID**. You do not need the Client Secret.
-5.  In the settings, you must also add your **Redirect URIs**. You will need to add a URI for your local development environment and another for your deployed application.
+4.  Copy your **Client ID**.
+5.  In the settings, you must add your **Redirect URIs**. You will need one for local development and another for your deployed site.
+    -   For **local development**, add this exact URI: `http://127.0.0.1:3000/`
+    -   For your **deployed site** (e.g., on Vercel), add its public URL, for example: `https://your-app-name.vercel.app/`
 
-    -   **For local development**, add this exact URI:
-        ```
-        http://127.0.0.1:3000/
-        ```
-    -   **For your deployed site** (e.g., on Vercel), you must add its public URL. For example:
-        ```
-        https://vinyl-spotify.vercel.app/
-        ```
-    You can add multiple Redirect URIs. It is important that both your local and deployed URLs are listed in your Spotify app settings.
+### 2. Environment Variables
 
-### 2. Install Dependencies
+This project uses a `.env` file to manage your Client ID.
+
+1.  In the root directory of the project, create a file named `.env`.
+2.  Add your Spotify Client ID to this file:
+    ```env
+    REACT_APP_SPOTIFY_CLIENT_ID=YOUR_SPOTIFY_CLIENT_ID_HERE
+    ```
+    Replace `YOUR_SPOTIFY_CLIENT_ID_HERE` with the actual ID you copied from your Spotify Developer Dashboard.
+
+### 3. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Run the Application
+### 4. Run the Application
 
 ```bash
 npm start
@@ -60,6 +57,4 @@ npm start
 
 The frontend will run on `http://127.0.0.1:3000` and should open automatically in your browser.
 
-The first time you open the app, it will ask you for the **Client ID** you copied from the Spotify Developer Dashboard. Paste it into the form to connect the app to your Spotify account.
-
-You can now log in and start playing music!
+You can now log in with your Spotify account and start playing music!

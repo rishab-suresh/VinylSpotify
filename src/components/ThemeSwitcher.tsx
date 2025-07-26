@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFeatherAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPalette } from '@fortawesome/free-solid-svg-icons';
 import './ThemeSwitcher.css';
+import { themes } from '../styles/themes';
 
 const ThemeSwitcher: React.FC = () => {
   const { setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
 
-  const availableThemes = ['dark', 'wood', 'floral']; 
+  const availableThemes = Object.keys(themes) as (keyof typeof themes)[];
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (switcherRef.current && !switcherRef.current.contains(event.target as Node)) {
@@ -23,7 +25,7 @@ const ThemeSwitcher: React.FC = () => {
     };
   }, []);
 
-  const handleThemeChange = (themeName: 'dark' | 'wood' | 'floral') => {
+  const handleThemeChange = (themeName: keyof typeof themes) => {
     setTheme(themeName);
     setIsOpen(false); // Close dropdown after selection
   };
@@ -35,13 +37,13 @@ const ThemeSwitcher: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)} 
         aria-label="Toggle Theme Menu"
       >
-        <FontAwesomeIcon icon={faFeatherAlt} />
+        <FontAwesomeIcon icon={faPalette} />
       </button>
 
       {isOpen && (
         <div className="theme-dropdown">
           {availableThemes.map((theme) => (
-            <button key={theme} onClick={() => handleThemeChange(theme as 'dark' | 'wood' | 'floral')}>
+            <button key={theme} onClick={() => handleThemeChange(theme)}>
               {theme.charAt(0).toUpperCase() + theme.slice(1)}
             </button>
           ))}

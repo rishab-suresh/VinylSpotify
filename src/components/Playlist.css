@@ -1,7 +1,7 @@
 /* src/components/Playlist.css */
 .playlist-container {
   background: var(--playlist-bg);
-  color: var(--text-color);
+  color: var(--text-color-primary); /* Use primary text color for the container */
   padding: 1.5rem;
   border-radius: 12px;
   width: 350px;
@@ -65,11 +65,12 @@ h2 {
 
 .track-name {
   font-weight: bold;
+  color: var(--text-color-primary);
 }
 
 .track-artist {
   font-size: 0.9em;
-  opacity: 0.8;
+  color: var(--text-color-secondary);
 }
 
 .empty-queue-message {

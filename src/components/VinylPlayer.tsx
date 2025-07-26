@@ -1,7 +1,7 @@
-import React, {useContext } from 'react';
+import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faBackward, faForward, faSignOutAlt, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faPause, faBackward, faForward, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import './VinylPlayer.css';
 import { usePlayer } from '../context/PlayerContext';
 import ThemeSwitcher from './ThemeSwitcher';
@@ -22,14 +22,6 @@ const VinylPlayer: React.FC = () => {
 
   const handleLogout = () => {
     auth?.logout();
-  };
-
-  const handleChangeClientId = () => {
-    if (window.confirm("This will log you out and you will need to re-enter a Client ID. Are you sure?")) {
-      auth?.logout(); // Clear the current session first
-      localStorage.removeItem('spotify_client_id');
-      window.location.reload();
-    }
   };
 
   const albumArtUrl = track?.album.images[0]?.url;
@@ -54,6 +46,7 @@ const VinylPlayer: React.FC = () => {
   return (
     <div className="vinyl-player-container">
       <div className="turntable-base">
+        <div className="author" onClick={() => window.open("https://portfolio-kappa-gilt-97.vercel.app/", "_blank") }>Rishab Suresh</div>
         <ThemeSwitcher />
         <div className="platter">
           <div className={`record ${isPlaying ? 'playing' : ''}`}>
@@ -69,10 +62,7 @@ const VinylPlayer: React.FC = () => {
           </div>
         </div>
 
-        <div className="volume-knob-area">
-          <div className="volume-knob" style={{ transform: `rotate(${volume * 270 - 135}deg)` }}>
-            <div className="knob-marker"></div>
-          </div>
+        <div className="volume-slider-area">
           <input
             type="range"
             min="0"
@@ -112,13 +102,9 @@ const VinylPlayer: React.FC = () => {
           </button>
         </div>
         <div className={`power-light ${isPlaying ? 'on' : ''}`}></div>
-        <div className="author" onClick={() => window.open("https://portfolio-kappa-gilt-97.vercel.app/", "_blank") }>Rishab Suresh</div>
       </div>
 
       <div className="app-actions-container">
-        <button onClick={handleChangeClientId} className="app-action-button" title="Change Client ID">
-          <FontAwesomeIcon icon={faEdit} />
-        </button>
         <button onClick={handleLogout} className="app-action-button" title="Logout">
           <FontAwesomeIcon icon={faSignOutAlt} />
         </button>

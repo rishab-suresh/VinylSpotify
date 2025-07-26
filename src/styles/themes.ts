@@ -112,8 +112,8 @@ export const floralTheme: Theme = {
     '--playlist-item-bg': 'rgba(212, 188, 166, 0.5)',
     
     // Text
-    '--text-color-primary': '#4a5d4a', // Muted green
-    '--text-color-secondary': '#8c7a6b', // Dusty rose-brown
+    '--text-color-primary': '#5c4b45', // Dark earthy brown
+    '--text-color-secondary': '#82736b', // Lighter brown
 
     // Knobs (Rose Gold)
     '--knob-bg': 'linear-gradient(145deg, #e6c0b3, #c8a395)',
@@ -133,8 +133,42 @@ export const floralTheme: Theme = {
   },
 };
 
+export const aquaTheme: Theme = {
+  name: 'aqua',
+  styles: {
+    // Backgrounds
+    '--main-app-bg': '#0f1c24',
+    '--turntable-base-bg': '#1a2e3a',
+    '--turntable-base-bg-image': 'none',
+    '--playlist-bg': '#1a2e3a',
+    '--playlist-bg-image': 'none',
+    '--playlist-item-bg': 'rgba(26, 68, 92, 0.5)',
+    
+    // Text
+    '--text-color-primary': '#a6e0e9', // Light cyan
+    '--text-color-secondary': '#7ac5d8', // Deeper cyan
+
+    // Knobs (Brushed Steel/Aqua)
+    '--knob-bg': 'linear-gradient(145deg, #8ab5c1, #5e8c9a)',
+    '--knob-border-color': '#4a6d7a',
+    '--knob-shadow-outer-dark': '#42616d', // Darker, less intense shadow
+    '--knob-shadow-outer-light': '#94c2d2', // Lighter, less intense glow
+    '--knob-shadow-inner': 'rgba(255, 255, 255, 0.15)',
+    '--knob-shadow-inset-dark': '#4a6d7a',
+    '--knob-shadow-inset-light': '#a2d3e4',
+    '--volume-knob-bg': 'linear-gradient(to bottom, #8ab5c1, #5e8c9a)',
+    '--volume-knob-border-color': '#4a6d7a',
+    '--volume-knob-shadow': 'rgba(30, 50, 60, 0.3)',
+    '--volume-knob-inner-shadow': 'rgba(255, 255, 255, 0.15)',
+    '--knob-marker-bg': '#e0f4f8',
+    '--record-bg': '#0a141a',
+    '--record-groove-color': 'rgba(170, 220, 230, 0.05)',
+  },
+};
+
 export const themes = {
   dark: darkTheme,
   wood: woodTheme,
   floral: floralTheme,
+  aqua: aquaTheme,
 }; 

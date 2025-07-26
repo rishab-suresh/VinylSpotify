@@ -1,7 +1,5 @@
 /* src/components/VinylPlayer.css */
-.vinyl-player-container {
-  /* Layout properties moved to App.css */
-}
+
 
 .turntable-base {
   position: relative;
@@ -21,7 +19,6 @@
 }
 
 .app-actions-container {
-  /* No longer positioned absolutely */
   display: flex;
   justify-content: center; /* Center the buttons */
   gap: 15px;
@@ -200,14 +197,20 @@
     box-shadow: 0 0 7px #17e510, 0 0 12px #17e510;
 }
 
-.author{
+.author {
     position: absolute;
-    bottom: 20px;
+    top: 20px;
     left: 20px;
-    color: #aaa;
+    color: var(--text-color-secondary);
     font-family: monospace;
     font-size: 14px;
     cursor: pointer;
+    z-index: 50;
+    transition: color 0.3s ease;
+}
+
+.author:hover {
+  color: var(--text-color-primary);
 }
 
 /* --- NEW UNIFIED CONTROLS --- */
@@ -234,9 +237,9 @@
   justify-content: center;
   align-items: center;
   box-shadow: 
-    5px 5px 10px var(--knob-shadow-outer-dark),
-    -5px -5px 10px var(--knob-shadow-outer-light),
-    inset 1px 1px 2px var(--knob-shadow-inner);
+    2px 2px 2px var(--knob-shadow-outer-dark),
+    -1px -1px 4px var(--knob-shadow-outer-light),
+    inset 1px 0px 1px var(--knob-shadow-inner);
   transition: all 0.1s ease-in-out;
 }
 
@@ -258,90 +261,55 @@
   color: var(--text-color-primary);
 }
 
-/* Remove special styling for play/pause to make all buttons uniform */
-.play-pause-button {
-  /* Inherits all styling from .control-button now */
-}
-
-.play-pause-button:hover {
-  /* No special hover needed anymore */
-}
 
 .play-pause-button .svg-inline--fa {
   color: var(--text-color-primary); /* Keep the icon white */
 }
 
-.volume-knob-area {
+.volume-slider-area {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 40px;
-  height: 40px;
-  /* Make it a container */
+  bottom: 20px;
+  left: 25%;
+  transform: translateX(-50%);
+  width: 200px;
   display: flex;
-  justify-content: center;
   align-items: center;
-}
-
-.volume-knob {
-  width: 100%;
-  height: 100%;
-  background: var(--volume-knob-bg);
-  border: 2px solid var(--volume-knob-border-color);
-  border-radius: 50%;
-  box-shadow: 0 3px 6px var(--volume-knob-shadow), inset 0 1px 1px var(--volume-knob-inner-shadow);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: transform 0.2s ease-out, background 0.4s ease, border-color 0.4s ease; /* Smooth rotation and theme change */
-  pointer-events: none; /* Let clicks pass through to the slider */
-}
-
-.knob-marker {
-  width: 4px;
-  height: 12px;
-  background-color: var(--knob-marker-bg);
-  border-radius: 2px;
-  transform: translateY(-8px);
-  transition: background-color 0.4s ease;
 }
 
 .volume-slider {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   -webkit-appearance: none;
   appearance: none;
-  background: transparent;
-  cursor: pointer;
-  z-index: 50; /* Above the knob visual */
+  width: 100%;
+  height: 8px;
+  background: var(--knob-border-color);
+  border-radius: 5px;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity .2s;
 }
 
-/* Hide the slider track */
-.volume-slider::-webkit-slider-runnable-track {
-  background: transparent;
-  border: none;
-}
-.volume-slider::-moz-range-track {
-  background: transparent;
-  border: none;
+.volume-slider:hover {
+  opacity: 1;
 }
 
-/* Hide the slider thumb */
 .volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 40px; /* Match knob area */
-  height: 40px; /* Match knob area */
-  background: transparent; /* Make it invisible */
+  width: 20px;
+  height: 20px;
+  background: var(--knob-bg);
+  border: 2px solid var(--knob-border-color);
+  border-radius: 50%;
+  cursor: pointer;
 }
+
 .volume-slider::-moz-range-thumb {
-  width: 40px; /* Match knob area */
-  height: 40px; /* Match knob area */
-  background: transparent; /* Make it invisible */
-  border: none;
+  width: 20px;
+  height: 20px;
+  background: var(--knob-bg);
+  border: 2px solid var(--knob-border-color);
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 /* --- RGB Volume Bar Styles --- */

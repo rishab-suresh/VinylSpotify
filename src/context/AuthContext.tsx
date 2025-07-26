@@ -49,28 +49,35 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// --- App Configuration ---
+// The Client ID is read from an environment variable.
+// You must create a .env file in the root of the project with:
+// REACT_APP_SPOTIFY_CLIENT_ID=your_spotify_client_id
+const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 
+// The redirect URI must match the one in your Spotify Developer Dashboard.
 // Using window.location.origin makes this dynamic for both local and deployed environments.
 const REDIRECT_URI = `${window.location.origin}/`;
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
-    accessToken: localStorage.getItem('spotify_access_token'),
-    refreshToken: localStorage.getItem('spotify_refresh_token'),
+    // Tokens are now read from sessionStorage
+    accessToken: sessionStorage.getItem('spotify_access_token'),
+    refreshToken: sessionStorage.getItem('spotify_refresh_token'),
     status: 'idle',
     error: null,
   });
 
   const login = useCallback(async () => {
-    const clientId = localStorage.getItem('spotify_client_id');
-    if (!clientId) {
-      console.error("Spotify Client ID is not set.");
-      setAuthState(s => ({ ...s, status: 'failed', error: 'Spotify Client ID is not set.'}));
+    if (!CLIENT_ID) {
+      console.error("Spotify Client ID is not set. Please create a .env file.");
+      setAuthState(s => ({ ...s, status: 'failed', error: 'Spotify Client ID is not configured.'}));
       return;
     }
 
     const codeVerifier = generateRandomString(64);
-    localStorage.setItem('pkce_code_verifier', codeVerifier);
+    // The verifier also goes into sessionStorage
+    sessionStorage.setItem('spotify_pkce_code_verifier', codeVerifier);
     
     const hashed = await sha256(codeVerifier);
     const codeChallenge = base64encode(hashed);
@@ -80,7 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     const params = {
       response_type: 'code',
-      client_id: clientId,
+      client_id: CLIENT_ID,
       scope,
       code_challenge_method: 'S256',
       code_challenge: codeChallenge,
@@ -93,9 +100,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = useCallback(() => {
     setAuthState({ accessToken: null, refreshToken: null, status: 'idle', error: null });
-    localStorage.removeItem('spotify_access_token');
-    localStorage.removeItem('spotify_refresh_token');
-    localStorage.removeItem('spotify_pkce_code_verifier');
+    // Clear sessionStorage
+    sessionStorage.removeItem('spotify_access_token');
+    sessionStorage.removeItem('spotify_refresh_token');
+    sessionStorage.removeItem('spotify_pkce_code_verifier');
     window.location.href = '/';
   }, []);
 
@@ -110,9 +118,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return null;
     }
 
-    const codeVerifier = localStorage.getItem('pkce_code_verifier');
-    const clientId = localStorage.getItem('spotify_client_id');
-    if (!clientId || !codeVerifier) {
+    const codeVerifier = sessionStorage.getItem('spotify_pkce_code_verifier');
+    if (!CLIENT_ID || !codeVerifier) {
       console.error("Client ID or code verifier is missing.");
       return null;
     }
@@ -125,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          client_id: clientId,
+          client_id: CLIENT_ID,
           grant_type: "authorization_code",
           code,
           redirect_uri: REDIRECT_URI,
@@ -138,9 +145,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       const data = await response.json();
-      localStorage.setItem('spotify_access_token', data.access_token);
-      localStorage.setItem('spotify_refresh_token', data.refresh_token);
-      localStorage.removeItem('pkce_code_verifier'); // Clean up
+      // Store tokens in sessionStorage
+      sessionStorage.setItem('spotify_access_token', data.access_token);
+      sessionStorage.setItem('spotify_refresh_token', data.refresh_token);
+      sessionStorage.removeItem('spotify_pkce_code_verifier'); // Clean up
 
       setAuthState({
         accessToken: data.access_token,

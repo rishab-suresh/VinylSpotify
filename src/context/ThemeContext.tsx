@@ -1,15 +1,17 @@
 import React, { createContext, useState, useContext, useMemo, useEffect, ReactNode } from 'react';
 import { themes, type Theme } from '../styles/themes';
 
+type ThemeName = keyof typeof themes;
+
 type ThemeContextType = {
   theme: Theme;
-  setTheme: (name: 'dark' | 'wood' | 'floral') => void;
+  setTheme: (name: ThemeName) => void;
 };
 
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [themeName, setThemeName] = useState<'dark' | 'wood' | 'floral'>('dark');
+  const [themeName, setThemeName] = useState<ThemeName>('dark');
 
   const theme = useMemo(() => {
     return themes[themeName] || themes.dark; // Fallback to dark theme if selection is invalid
