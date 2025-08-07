@@ -49,15 +49,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// --- App Configuration ---
-// The Client ID is read from an environment variable.
-// For local development, you must create a .env file in the root of the project with:
-// REACT_APP_SPOTIFY_CLIENT_ID=your_spotify_client_id
-// For deployment, set this variable in your Vercel project settings.
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 
-// The redirect URI must match the one in your Spotify Developer Dashboard.
-// Using window.location.origin makes this dynamic for both local and deployed environments.
 const REDIRECT_URI = `${window.location.origin}/`;
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {

@@ -28,8 +28,8 @@ To connect to Spotify, you need to create an application in the [Spotify Develop
 2.  Give your app a name and description.
 3.  Once created, go to the app's **Settings**.
 4.  Copy your **Client ID**.
-5.  In the settings, you must add your **Redirect URIs**. You will need one for local development and another for your deployed site.
-    -   For **local development**, add this exact URI: `http://127.0.0.1:3000/`
+5.  In the settings, you must add your **Redirect URIs**. The URI must exactly match the URL you use to run your app locally.
+    -   **Important for local development:** Your browser can use either `http://localhost:3000/` or `http://127.0.0.1:3000/`. To be safe, it's best to **add both** of these to your list of allowed Redirect URIs in the Spotify Developer Dashboard.
     -   For your **deployed site** (e.g., on Vercel), add its public URL, for example: `https://your-app-name.vercel.app/`
 
 ### 2. Environment Variables

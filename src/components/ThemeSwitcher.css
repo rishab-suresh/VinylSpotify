@@ -2,8 +2,11 @@
 
 /* This container ensures the dropdown is positioned relative to the toggle button */
 .theme-switcher-container {
-  position: relative;
+  position: absolute; /* Changed from relative */
+  top: 20px; /* Position from top */
+  right: 20px; /* Position from right */
   display: inline-block;
+  z-index: 51; /* Ensure it's above the author text if they ever overlap */
 }
 
 .theme-toggle-button {
