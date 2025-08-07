@@ -34,14 +34,17 @@ To connect to Spotify, you need to create an application in the [Spotify Develop
 
 ### 2. Environment Variables
 
-This project uses a `.env` file to manage your Client ID.
+This project requires a Spotify Client ID to function. The method for providing it depends on your environment:
 
-1.  In the root directory of the project, create a file named `.env`.
-2.  Add your Spotify Client ID to this file:
-    ```env
-    REACT_APP_SPOTIFY_CLIENT_ID=YOUR_SPOTIFY_CLIENT_ID_HERE
-    ```
-    Replace `YOUR_SPOTIFY_CLIENT_ID_HERE` with the actual ID you copied from your Spotify Developer Dashboard.
+-   **For Vercel Deployment:** The application is configured to automatically use environment variables set in your Vercel project dashboard. Simply create an environment variable named `REACT_APP_SPOTIFY_CLIENT_ID` and set its value to your Spotify Client ID.
+
+-   **For Local Development:** To run the project on your local machine, you must create a `.env` file in the root directory.
+    1.  Create a file named `.env`.
+    2.  Add your Spotify Client ID to this file:
+        ```env
+        REACT_APP_SPOTIFY_CLIENT_ID=YOUR_SPOTIFY_CLIENT_ID_HERE
+        ```
+        Replace `YOUR_SPOTIFY_CLIENT_ID_HERE` with the actual ID you copied from your Spotify Developer Dashboard.
 
 ### 3. Install Dependencies
 
