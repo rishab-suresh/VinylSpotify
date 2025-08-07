@@ -8,7 +8,6 @@ const WebPlayback: React.FC = () => {
   const playerRef = useRef<Spotify.Player | null>(null);
 
   const onReady = useCallback(async ({ device_id }: { device_id: string }) => {
-    console.log('Ready with Device ID', device_id);
     setDeviceId(device_id);
 
     // --- Automatically transfer playback to this new device ---
